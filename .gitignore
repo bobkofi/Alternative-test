@@ -1,0 +1,93 @@
+import java.util.Scanner;
+public class Main
+{
+    public static void main(String[] args) {
+        try{
+            Scanner in = new Scanner(System.in);
+            System.out.println(calc(in.nextLine()));
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+    public static String calc(String input) throws Exception {
+
+        String[] inputData = new String[3];
+        if(input.contains("\"")){
+            String[] operators = {"+","-","*","/"} ;
+            for (int i = 0; i < operators.length; i++){
+                if(input.contains(" " + operators[i] + " ")){
+                    inputData[0] = input.substring(0,input.indexOf(" " + operators[i] + " "));
+                    inputData[1] = operators[i];
+                    inputData[2] = input.substring(inputData[0].length() + 3, input.length());
+                    break;
+                }
+            }
+        }
+        else{
+            inputData = input.split(" ");
+            if((inputData.length != 3)){
+                throw new Exception("Не верный формат строки.\nДоступно только два операнда и один оператор (+, -, /, *).");
+            }
+        }
+        String operator = inputData[1]; // присваиваем оператор
+        if((inputData[0].charAt(0) == '\"') && (inputData[0].charAt(inputData[0].length() - 1) == '\"')){
+            if((inputData[0].length() > 12) && (inputData[2].length() > 12)){
+                throw new Exception("Привышена длинна строки, лимит = 10 символов.");
+            }
+            String first = inputData[0].replace("\"","");
+            String second = inputData[2];
+            if((second.length() != 1)&&(second.charAt(0) == '\"') && (second.charAt(second.length() - 1) == '\"')){
+
+                second = inputData[2].replace("\"","");
+                switch (operator){
+                    case "+":
+                        return getAnswerString(first + second);
+                    case "-":
+                        return getAnswerString(first.replace(second,""));
+                    case "*":
+                        throw new Exception("При умножении второй операнд - число в диапозоне [1..10].");
+                    case "/":
+                        throw new Exception("При делении второй операнд - число в диапозоне [1..10].");
+                    default: 
+                        throw new Exception("Не верный формат оператора.\nОператор должен быть (+, -, /, *).");
+                }
+            }
+            else if (!second.contains("\"")){
+                int num = tryParse(inputData[2]);
+                if((num < 1) || (num > 10)){
+                    throw new Exception("Не верный формат операндов.\nЕсли операнд - число, он должен принадлежать диапозону [1..10].");
+                }
+                switch (operator){
+                    case "+":
+                        throw new Exception("При сложении второй операнд - строка в \"кавычках\".");
+                    case "-":
+                        throw new Exception("При вычитании второй операнд - строка в \"кавычках\".");
+                    case "*":
+                        return  getAnswerString(first.repeat(num));
+                    case "/":
+                        return getAnswerString(first.substring(0,first.length() / num));
+                    default:
+                        throw new Exception("Не верный формат оператора.\nОператор должен быть (+, -, /, *).");
+                }
+            }
+            else {
+                throw new Exception("Не верный формат операндов.\nОба операндов должны являться строкой в \"кавычках\".");
+            }
+        }
+        else {
+            throw new Exception("Не верный формат операндов.\nОба операндов должны являться строкой в \"кавычках\".");
+        }
+    }
+    private static int tryParse(String value){
+        try {
+            return Integer.parseInt(value);
+        }
+        catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+    private static String getAnswerString(String value){
+        return "\"" + ((value.length() <= 40) ? value : (value.substring(0,40) + "...")) + "\"";
+    }
+}
